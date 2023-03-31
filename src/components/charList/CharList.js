@@ -12,7 +12,7 @@ class CharList extends Component {
     }
 
     componentDidMount() {
-        this.updateChar();
+        this.onRequest();
     }
 
     onError = () => {
@@ -29,6 +29,12 @@ class CharList extends Component {
             char, 
             loading: false
         })
+    }
+
+    onRequest = (offset) => {
+        this.marvelServices.getAllCharacters(offset)
+            .then(this.onCharLoaded)
+            .catch(this.onError);
     }
 
     updateChar = () => {
