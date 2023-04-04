@@ -1,9 +1,10 @@
+import { Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { PropTypes } from 'prop-types';
 import Spinner from '../spinner/Spinner';
 import ErrorMessage from '../errorMessage/ErrorMessage';
 import Skeleton from '../skeleton/Skeleton';
-import MarvelService from '../../services/MarvelService';
+import useMarvelService from '../../services/MarvelService';
 
 import './charInfo.scss';
 
@@ -11,16 +12,8 @@ import './charInfo.scss';
 const CharInfo = (props) => {
 
     const [char, setChar] = useState(null);
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState(false);
 
-
-    const marvelServices = new MarvelService();
-
-    useEffect(() => {
-        updateChar();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [])
+    const {loading, error, getCharacter, clearError} = useMarvelService();
 
     useEffect(() => {
         updateChar();
@@ -28,30 +21,20 @@ const CharInfo = (props) => {
     }, [props.charId])  
 
     const updateChar = () => {
+        clearError();
         const {charId} = props;
         if (!charId) {
             return;
         }
-        onCharLoading();
-        marvelServices
-            .getCharacter(charId)
-            .then(onCharLoaded)
-            .catch(onError);  
+        getCharacter(charId)
+            .then(onCharLoaded); 
     }
 
     const onCharLoaded = (char) => {
         setChar(char);
-        setLoading(false);
     }
 
-    const onCharLoading = () => {
-        setLoading(true);
-    }
 
-    const onError = () => {
-        setLoading(false);
-        setError(true);
-    }
 
     const skeleton = char || loading || error ? null : <Skeleton/>
     const errorMessage = error ? <ErrorMessage/> : null;
@@ -98,12 +81,14 @@ const View = ({char}) => {
                 {comics.length > 0 ? null : 'No comics'}
                 {
                     comics.map((item, i) => {
+                        const id = item.resourceURI.substr(item.resourceURI.lastIndexOf('/')+1);
                         if (i > 9) {
                             return null;
                         }
                         return (
                             <li key={i} className="char__comics-item">
-                                {item.name}
+                                <Link to={`/comics/${id}`} className="single-comic__back">{item.name}</Link>
+                                
                             </li>
                         )
                     })                
