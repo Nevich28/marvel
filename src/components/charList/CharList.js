@@ -4,6 +4,8 @@ import './charList.scss';
 import useMarvelService from '../../services/MarvelService';
 import Spinner from '../spinner/Spinner';
 import ErrorMessage from '../errorMessage/ErrorMessage';
+import {CSSTransition, TransitionGroup} from 'react-transition-group';
+
 
 const CharList = (props) => {
     const [char, setChar] = useState([]);
@@ -52,30 +54,34 @@ const CharList = (props) => {
             }
             
             return (
-                <li 
-                    className={activeClass}
-                    tabIndex={0}
-                    ref={el => itemRefs.current[i] = el}
-                    key={item.id}
-                    onClick={() => {
-                        props.onCharSelected(item.id);
-                        focusOnItem(i);
-                        }}
-                    onKeyPress={(e) => {
-                        if (e.key === ' ' || e.key === "Enter") {
+                <CSSTransition key={item.id} timeout={500} classNames={activeClass}>
+                    <li 
+                        className={activeClass}
+                        tabIndex={0}
+                        ref={el => itemRefs.current[i] = el}
+                        
+                        onClick={() => {
                             props.onCharSelected(item.id);
                             focusOnItem(i);
-                        }
-                    }}>
-                        <img src={item.thumbnail} alt={item.name} style={styleImg}/>
-                        <div className="char__name">{item.name}</div>
-                </li>
+                            }}
+                        onKeyPress={(e) => {
+                            if (e.key === ' ' || e.key === "Enter") {
+                                props.onCharSelected(item.id);
+                                focusOnItem(i);
+                            }
+                        }}>
+                            <img src={item.thumbnail} alt={item.name} style={styleImg}/>
+                            <div className="char__name">{item.name}</div>
+                    </li>
+                </CSSTransition>
             )
         });
         // А эта конструкция вынесена для центровки спиннера/ошибки
         return (
             <ul className="char__grid">
-                {items}
+                <TransitionGroup component={null}>
+                    {items}
+                </TransitionGroup>
             </ul>
         )
     }
@@ -83,12 +89,6 @@ const CharList = (props) => {
     const items = renderItems(char)
     const errorMessage = error ? <ErrorMessage/> : null;
     const spinner = loading && !newItemLoading ? <Spinner/> : null;
-
-    if (loading) {
-        import('./someFunc')
-            .then(obj => obj.loger())
-            .catch();
-    }
 
     return (
         <div className="char__list">

@@ -1,8 +1,10 @@
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { Helmet } from "react-helmet";
+import { useParams, Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import Spinner from '../spinner/Spinner';
 import ErrorMessage from '../errorMessage/ErrorMessage';
 import useMarvelService from '../../services/MarvelService';
+import AppBanner from '../appBanner/AppBanner';
 
 
 
@@ -12,8 +14,8 @@ const SingleComicPage = () => {
     const {comicId} = useParams();
     const [comic, setComic] = useState(null);
     const {loading, error, getComic, clearError} = useMarvelService();
-    const navigate = useNavigate();
-    console.log(navigate);
+    // const navigate = useNavigate();
+    // console.log(navigate);
 
     useEffect(() => {
         updateComic();
@@ -37,6 +39,7 @@ const SingleComicPage = () => {
 
     return (
         <>
+            <AppBanner/>
             {errorMessage}
             {spinner}
             {content}
@@ -50,7 +53,15 @@ const View = ({comic}) => {
 
     const currentPrise = price === 0 ? 'NOT AVAILABLE' : `${price}$`;
     return (
+        
         <div className="single-comic">
+            <Helmet>
+                <meta
+                    name="description"
+                    content={`${title} comics book`}
+                />
+                <title>{title}</title>
+            </Helmet>    
             <img src={thumbnail} alt={title} className="single-comic__img"/>
             <div className="single-comic__info">
                 <h2 className="single-comic__name">{title}</h2>
