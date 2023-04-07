@@ -6,13 +6,33 @@ import useMarvelService from '../../services/MarvelService';
 import Spinner from '../spinner/Spinner';
 import ErrorMessage from '../errorMessage/ErrorMessage';
 
+const setContent = (process, Component, newItemLoading) => {
+    switch (process) {
+        case 'waiting':
+            return <Spinner/>;
+            // break;
+        case 'loading':
+            return newItemLoading ? <Component/> : <Spinner/>;
+            // break;
+        case 'confirmed':
+            return <Component/>;
+            // break;
+        case 'error':
+            return <ErrorMessage/>;
+            // break;
+        default: 
+            throw new Error('Unexpected process state');
+    }
+}
+
+
 const ComicsList = () => {
     const [char, setChar] = useState([]);
     const [newItemLoading, setNewItemLoading] = useState(false);
     const [offset, setOffset] = useState(0);
     const [charEnded, setCharEnded] = useState(false);
 
-    const {loading, error, getAllComics} = useMarvelService();
+    const {getAllComics, process, setProcess} = useMarvelService();
 
     useEffect(() => {
         onRequest(offset, true);
@@ -23,7 +43,9 @@ const ComicsList = () => {
     const onRequest = (offset, initial) => {
         initial ? setNewItemLoading(false) : setNewItemLoading(true);
         getAllComics(offset)
-            .then(onComicsLoaded);
+            .then(onComicsLoaded)
+            .then(() => setProcess('confirmed'));
+            
     }
 
     const onComicsLoaded = (newChar) => {
@@ -58,16 +80,10 @@ const ComicsList = () => {
         )
     }
 
-    const items = renderItems(char)
-    const errorMessage = error ? <ErrorMessage/> : null;
-    const spinner = loading && !newItemLoading ? <Spinner/> : null;
-
     return (
         
         <div className="comics__list">
-            {errorMessage}
-            {spinner}
-            {items}
+            {setContent(process, () => renderItems(char), newItemLoading)}
             <button className="button button__main button__long"
                 disabled={newItemLoading}
                 style={{'display': charEnded ? 'none' : 'block'}}
